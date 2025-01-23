@@ -1,0 +1,20 @@
+{
+  "name": "devtinder_backend",
+  "version": "1.0.0",
+  "description": "tinder for devs",
+  "keywords": [
+    "nodeJS",
+    "Javascript"
+  ],
+  "license": "ISC",
+  "author": "Varun Budhani",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start" : "npm src/app.js",
+    "dev" : "nodemon src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
