@@ -1,6 +1,7 @@
 // to design schema for user collection
 
 const mongoose  = require("mongoose");
+const validator = require("validator");
 
 // schema design
 const userSchema = new mongoose.Schema({
@@ -20,11 +21,21 @@ const userSchema = new mongoose.Schema({
         required : true,
         unique : true,
         lowercase : true,
-        trim : true
+        trim : true,
+        validate(value) {
+            if(!validator.isEmail(value)){
+                throw new Error("Email not valid! Please enter a valid email");
+            }
+        }
     },
     password : {
         type : String,
         required : true,
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("Ur password is weak!! Enter a strong one")
+            }
+        }
     },
     age : {
         type : Number,
@@ -35,7 +46,7 @@ const userSchema = new mongoose.Schema({
         lowercase : true,
         validate(value){
             if(!["male" , "female" , "other"].includes(value)){
-                throw new Error("Not a valid gender");
+                throw new Error(" : Not a valid gender");
             }
         },
         required : true,
@@ -43,6 +54,11 @@ const userSchema = new mongoose.Schema({
     photoUrl : {
         type : String,
         default : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error(": Photo url not valid")
+            }
+        }
     },
     skills : {
         type : [String],

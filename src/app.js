@@ -94,11 +94,24 @@ app.delete("/user" , async (req , res) => {
 // Update data of the user using id
 // we will use patch bcoz patch updates specific fields in a doc and keeps others as it is
 // but put updates all fields and if we do not pass vals for any it keeps the null
-app.patch("/user" , async (req , res) => {
-    const userId = req.body.userId;
+app.patch("/user/:userId" , async (req , res) => {
+    const userId = req.params?.userId;
     const userDetails = req.body; //this will be the data we pass in the request body
     // console.log("in id")
+    
     try{
+        const ALLOWED_UPDATES = ["age" , "skills" , "gender" , "photoUrl" , "about" , "password"];
+        console.log(userDetails)
+        const isUpdateAllowed = Object.keys(userDetails).every((k) => {
+            return ALLOWED_UPDATES.includes(k);
+        });
+        console.log(isUpdateAllowed)
+        if(!isUpdateAllowed){
+            throw new Error(" : Update not allowed")
+        }
+        if(userDetails?.skills.length > 10) {
+            throw new Error(" : Skills cannot be more than 10");
+        }
         await User.findByIdAndUpdate(userId , 
             userDetails,
             {runValidators : true},
