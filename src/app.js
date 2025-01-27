@@ -1,7 +1,10 @@
 const express = require("express");
 const connectDb = require("./config/database")
 // import database file here so that we can run it also to connect to our db
-const User = require("./models/user")
+const User = require("./models/user");
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 // creating a server
 const app = express();
@@ -12,16 +15,33 @@ app.use((express.json())); //middlewares which will work for every req as we hav
 // post request to handle dignup
 app.post("/signup" , async (req , res) => {
 
+    
     // we can directly do this
-    const user = new User(req.body);
-
-    // // if we do not pass id mongodb automatically adds an _id and __v into the document i.e inside our collection in db
-
-    // // creating an instance of our User Model manually
-    // const user = new User(userObj); //userObj will be created here itself manually
+    
 
     // // save this instance
     try{
+        // Validating the data
+        validateSignUpData(req); 
+
+        // Encrypting the data
+        const { firstName , lastName , emailId , password } = req.body;
+        const passwordHash = await bcypt.hash(password , 10);
+        console.log(passwordHash);
+
+
+        const user = new User({
+            firstName ,
+            lastName,
+            emailId,
+            password : passwordHash
+        });
+
+        // // if we do not pass id mongodb automatically adds an _id and __v into the document i.e inside our collection in db
+
+        // // creating an instance of our User Model manually
+        // const user = new User(userObj); //userObj will be created here itself manually
+
         await user.save(); 
         //after .save this data will be saved onto a db and this .save will return a promise so we will have to make it await and make this function an async fn
         // WHENEVER WE ARE DOING SOMETHING WITH THE DB(PUT , GET  POST , DELETE , PATCH) WE MOSTLY MAKE IT AS AN ASYNC AWAIT
@@ -30,9 +50,34 @@ app.post("/signup" , async (req , res) => {
         res.send("User Added Successfully");
     }
     catch(err){
-        res.status(400).send(err.message);
+        res.status(400).send("ERROR : " + err.message);
     }
     
+});
+
+app.post("/login" , async (req , res) => {
+    try{
+        const {emailId , password} = req.body;
+
+        if(!validator.isEmail(emailId)){
+            throw new Error("Email id not valid");
+        }   
+        const user = await User.findOne({emailId : emailId});
+        if(!user){
+            throw new Error("Invalid Credentials");
+        }
+
+        const isPasswordValid = await bcrypt.compare(password , user.password);
+        
+        if(isPasswordValid){
+            res.send("Login successful")
+        }else{
+            throw new Error("Invalid Credentials");
+        }
+    }
+    catch(err){
+        res.status(400).send("Something went wrong!!" + err.message);
+    }
 });
 
 // to find user by email
@@ -94,6 +139,7 @@ app.delete("/user" , async (req , res) => {
 // Update data of the user using id
 // we will use patch bcoz patch updates specific fields in a doc and keeps others as it is
 // but put updates all fields and if we do not pass vals for any it keeps the null
+
 app.patch("/user/:userId" , async (req , res) => {
     const userId = req.params?.userId;
     const userDetails = req.body; //this will be the data we pass in the request body
