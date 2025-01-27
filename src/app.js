@@ -30,10 +30,87 @@ app.post("/signup" , async (req , res) => {
         res.send("User Added Successfully");
     }
     catch(err){
-        res.status(400).send("Error saving the user" , err.message)
+        res.status(400).send(err.message);
     }
     
+});
+
+// to find user by email
+app.get("/user" , async (req , res) => {
+    const userEmail = req.body.emailId;
+
+    try{
+        const user = await User.find({emailId : userEmail});
+        // this will return an array of documents with email id that i gave in the req body like this
+        // {
+        //     "emailId" : "varunbudhani1954@gmail.com"
+        // }
+        if(user.length === 0){
+            res.status(404).send("User not found");
+        }else{
+            res.send(user);
+        }
+    }
+    catch(err){
+        res.status(400).send("Something went wrong");
+    }
 })
+
+// Feed api - to get all the users added in our app
+app.get("/feed" , async (req , res) => {
+    try{
+        const users = await User.find({});  //empty obj will send all the data back
+        res.send(users);
+    }
+    catch(err){
+        res.status(400).send("Something went wrong");
+    }
+});
+
+// delete a user by Id
+app.delete("/user" , async (req , res) => {
+    const userId = req.body.userId;
+    try{
+        await User.findByIdAndDelete(userId);
+        res.send("User deleted successfully");
+    }catch(err){
+        res.status(400).send("Something went wrong");
+    }
+});
+
+// // update details of user using email
+// app.patch("/user" , async (req , res) => {
+//     const userEmail = req.body.emailId;
+//     const userDetails = req.body;
+//     console.log(userDetails);
+//     try{
+//         await User.findOneAndUpdate({"emailId" : userEmail} , userDetails);
+//         res.send("User updated Successfully via Email");
+//     }catch(err){
+//         res.status(400).send("Something went wrong");
+//     }
+// })
+
+// Update data of the user using id
+// we will use patch bcoz patch updates specific fields in a doc and keeps others as it is
+// but put updates all fields and if we do not pass vals for any it keeps the null
+app.patch("/user" , async (req , res) => {
+    const userId = req.body.userId;
+    const userDetails = req.body; //this will be the data we pass in the request body
+    // console.log("in id")
+    try{
+        await User.findByIdAndUpdate(userId , 
+            userDetails,
+            {runValidators : true},
+        );  //this userDetails will be the replacement for prev data
+        // if we pass in data that is not present in our userSchema mongo will ognore it
+        res.send("User updated successfully via Id");
+    }catch(err){
+        res.status(404).send("Update failed" + err.message);
+    }
+});
+
+
 
 // connecting to the db an then server will start listening to the reqs
 connectDb()

@@ -5,23 +5,50 @@ const mongoose  = require("mongoose");
 // schema design
 const userSchema = new mongoose.Schema({
     firstName : {
-        type : String
+        type : String,
+        required : true,
+        max : 20,
+        min : 2,
     },
     lastName : {
-        type : String
+        type : String,
+        max : 20,
+        min : 2,
     },
     emailId : {
-        type : String
+        type : String,
+        required : true,
+        unique : true,
+        lowercase : true,
+        trim : true
     },
     password : {
-        type : String
+        type : String,
+        required : true,
     },
     age : {
-        type : Number
+        type : Number,
+        required : true,
     },
     gender : {
-        type : String
+        type : String,
+        lowercase : true,
+        validate(value){
+            if(!["male" , "female" , "other"].includes(value)){
+                throw new Error("Not a valid gender");
+            }
+        },
+        required : true,
     },
+    photoUrl : {
+        type : String,
+        default : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+    },
+    skills : {
+        type : [String],
+    }
+} , {
+    timestamps : true,    //this will help track updation and creation timings of our documents
 });
 
 // after creating a schema we create a mongoose model
