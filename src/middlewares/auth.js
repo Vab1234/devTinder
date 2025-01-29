@@ -23,7 +23,7 @@ const userAuth = async (req , res , next) => {
         req.user = user; // attaching the user to the reqs to be used in next req handlers
         next(); // next bcoz this is a middleware and we will moove to the required req handler after this whomsoever calls this
     }catch(err){
-        res.status(400).send("Something went wrong in auth" + err.message); 
+        res.status(400).send("Something went wrong in auth : " + err.message); 
     }
 }
 
