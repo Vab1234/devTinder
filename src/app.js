@@ -5,21 +5,22 @@ const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 // creating a server
 const app = express();
 
+
 // to send data dynamically throughe req body we will need a middleware known as "express.json()" so that server can understand json
 app.use((express.json())); //middlewares which will work for every req as we have used "use" and have not passed any specific route
 
+// to read cookies
+app.use(cookieParser());
+
 // post request to handle dignup
 app.post("/signup" , async (req , res) => {
-
-    
-    // we can directly do this
-    
-
-    // // save this instance
     try{
         // Validating the data
         validateSignUpData(req); 
@@ -28,7 +29,6 @@ app.post("/signup" , async (req , res) => {
         const { firstName , lastName , emailId , password } = req.body;
         const passwordHash = await bcypt.hash(password , 10);
         console.log(passwordHash);
-
 
         const user = new User({
             firstName ,
@@ -52,7 +52,6 @@ app.post("/signup" , async (req , res) => {
     catch(err){
         res.status(400).send("ERROR : " + err.message);
     }
-    
 });
 
 app.post("/login" , async (req , res) => {
@@ -67,9 +66,17 @@ app.post("/login" , async (req , res) => {
             throw new Error("Invalid Credentials");
         }
 
-        const isPasswordValid = await bcrypt.compare(password , user.password);
+        const isPasswordValid = await user.validatePassword(password);
         
         if(isPasswordValid){
+            // create a JWT token
+            // const token = jwt.sign(hidden deta , secret key known only ny the server)
+            const token = await user.getJWT();
+            // console.log("The token is " + token)
+            // the cookie that the server will send from here will contain the userid encrypted
+
+            // Add the token to cookie and send it back to the user 
+            res.cookie("token" , token);
             res.send("Login successful")
         }else{
             throw new Error("Invalid Credentials");
@@ -80,96 +87,28 @@ app.post("/login" , async (req , res) => {
     }
 });
 
-// to find user by email
-app.get("/user" , async (req , res) => {
-    const userEmail = req.body.emailId;
-
+app.get("/profile" , userAuth , async (req , res) => {
     try{
-        const user = await User.find({emailId : userEmail});
-        // this will return an array of documents with email id that i gave in the req body like this
-        // {
-        //     "emailId" : "varunbudhani1954@gmail.com"
+        // const cookie = req.cookies;
+        // const {token} = cookie;
+
+        // if(!token){
+        //     throw new Error("Invalid Token")
         // }
-        if(user.length === 0){
-            res.status(404).send("User not found");
-        }else{
-            res.send(user);
-        }
+
+        // // validate token
+        // const decodedMessage = jwt.verify(token , "devTinder@000")
+        // // this gives a decoded value
+
+        // const { _id } = decodedMessage;
+
+        const user = req.user;
+        res.send(user);
     }
     catch(err){
-        res.status(400).send("Something went wrong");
+        res.status(400).send("Something went wrong : "  + err.message)
     }
 })
-
-// Feed api - to get all the users added in our app
-app.get("/feed" , async (req , res) => {
-    try{
-        const users = await User.find({});  //empty obj will send all the data back
-        res.send(users);
-    }
-    catch(err){
-        res.status(400).send("Something went wrong");
-    }
-});
-
-// delete a user by Id
-app.delete("/user" , async (req , res) => {
-    const userId = req.body.userId;
-    try{
-        await User.findByIdAndDelete(userId);
-        res.send("User deleted successfully");
-    }catch(err){
-        res.status(400).send("Something went wrong");
-    }
-});
-
-// // update details of user using email
-// app.patch("/user" , async (req , res) => {
-//     const userEmail = req.body.emailId;
-//     const userDetails = req.body;
-//     console.log(userDetails);
-//     try{
-//         await User.findOneAndUpdate({"emailId" : userEmail} , userDetails);
-//         res.send("User updated Successfully via Email");
-//     }catch(err){
-//         res.status(400).send("Something went wrong");
-//     }
-// })
-
-// Update data of the user using id
-// we will use patch bcoz patch updates specific fields in a doc and keeps others as it is
-// but put updates all fields and if we do not pass vals for any it keeps the null
-
-app.patch("/user/:userId" , async (req , res) => {
-    const userId = req.params?.userId;
-    const userDetails = req.body; //this will be the data we pass in the request body
-    // console.log("in id")
-    
-    try{
-        const ALLOWED_UPDATES = ["age" , "skills" , "gender" , "photoUrl" , "about" , "password"];
-        console.log(userDetails)
-        const isUpdateAllowed = Object.keys(userDetails).every((k) => {
-            return ALLOWED_UPDATES.includes(k);
-        });
-        console.log(isUpdateAllowed)
-        if(!isUpdateAllowed){
-            throw new Error(" : Update not allowed")
-        }
-        if(userDetails?.skills.length > 10) {
-            throw new Error(" : Skills cannot be more than 10");
-        }
-        await User.findByIdAndUpdate(userId , 
-            userDetails,
-            {runValidators : true},
-        );  //this userDetails will be the replacement for prev data
-        // if we pass in data that is not present in our userSchema mongo will ognore it
-        res.send("User updated successfully via Id");
-    }catch(err){
-        res.status(404).send("Update failed" + err.message);
-    }
-});
-
-
 
 // connecting to the db an then server will start listening to the reqs
 connectDb()

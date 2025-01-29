@@ -2,6 +2,8 @@
 
 const mongoose  = require("mongoose");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 // schema design
 const userSchema = new mongoose.Schema({
@@ -64,6 +66,26 @@ const userSchema = new mongoose.Schema({
 } , {
     timestamps : true,    //this will help track updation and creation timings of our documents
 });
+
+// using schema methods to offload some functionalties is always a good practice
+userSchema.methods.getJWT = async function (){
+    const user = this;
+    console.log(user);
+    const token = jwt.sign({_id : user._id} , "devTinder@000" , {
+        expiresIn : "7d"
+    });
+    // console.log(token)
+    return token;
+}
+
+userSchema.methods.validatePassword = async function (passwordSentByUser){
+    const user = this;
+
+    const passwordHash = user.password;
+
+    const isPasswordValid = await bcrypt.compare(passwordSentByUser , passwordHash);
+    return isPasswordValid;
+}
 
 // after creating a schema we create a mongoose model
 // Name of mongoose model starts with a capital letter
