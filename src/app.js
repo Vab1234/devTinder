@@ -15,11 +15,13 @@ app.use(cookieParser());
 const authRouter = require("./routes/auth");
 const profileRouter =  require("./routes/profile");
 const requestsRouter = require("./routes/requests");
+const userRouter = require("./routes/user")
 
 // Using the routes
 app.use("/" , authRouter);
 app.use("/" , profileRouter);
 app.use("/" , requestsRouter);
+app.use("/" , userRouter)
 
 // connecting to the db an then server will start listening to the reqs
 connectDb()
