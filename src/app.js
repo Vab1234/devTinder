@@ -1,6 +1,7 @@
 const express = require("express");
 const connectDb = require("./config/database")
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 // creating a server
 const app = express();
@@ -10,6 +11,9 @@ app.use((express.json())); //middlewares which will work for every req as we hav
 
 // to read cookies
 app.use(cookieParser());
+
+// to handle CORS error
+app.use(cors())
 
 // Importing the routes(Basicaally importing tjhe routes)
 const authRouter = require("./routes/auth");
@@ -21,7 +25,8 @@ const userRouter = require("./routes/user")
 app.use("/" , authRouter);
 app.use("/" , profileRouter);
 app.use("/" , requestsRouter);
-app.use("/" , userRouter)
+app.use("/" , userRouter);
+
 
 // connecting to the db an then server will start listening to the reqs
 connectDb()
