@@ -24,7 +24,7 @@ requestRouter.post("/request/send/:status/:toUserId" , userAuth , async (req , r
 
         // check wether the user that we are sending request to even exists in our db or not
         const toUser = await User.findById(toUserId);
-        console.log(toUser);
+        // console.log(toUser);
         if(!toUser){
             return res.json({message : "User does not exist"});
         }

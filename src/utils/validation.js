@@ -17,7 +17,7 @@ const validateSignUpData = (req) => {
 }
 
 const validateEditProfileData = (req) =>{
-    const ALLOWED_FIELDS = ["about" , "firstName" , "lastName" , "photoUrl" , "skills" , "gender" , "age"];
+    const ALLOWED_FIELDS = ["about" , "firstName" , "lastName" , "photoUrl" , "skills" , "gender" , "age" , "description"];
 
     const isEditAllowed = Object.keys(req.body).every((k) => {
         ALLOWED_FIELDS.includes(k);

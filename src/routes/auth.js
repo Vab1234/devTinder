@@ -7,6 +7,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const validator = require("validator")
 
+
 // post request to handle dignup
 authRouter.post("/signup" , async (req , res) => {
     try{
@@ -14,14 +15,14 @@ authRouter.post("/signup" , async (req , res) => {
         validateSignUpData(req); 
 
         // Encrypting the data
-        const { firstName , lastName , emailId , password } = req.body;
+        const { firstName , lastName , emailId , password , age , gender , skills} = req.body;
         const passwordHash = await bcrypt.hash(password , 10);
 
         const user = new User({
             firstName ,
             lastName,
             emailId,
-            password : passwordHash
+            password : passwordHash,
         });
 
         // // if we do not pass id mongodb automatically adds an _id and __v into the document i.e inside our collection in db
@@ -29,12 +30,17 @@ authRouter.post("/signup" , async (req , res) => {
         // // creating an instance of our User Model manually
         // const user = new User(userObj); //userObj will be created here itself manually
 
-        await user.save(); 
+        const savedUser = await user.save(); 
         //after .save this data will be saved onto a db and this .save will return a promise so we will have to make it await and make this function an async fn
         // WHENEVER WE ARE DOING SOMETHING WITH THE DB(PUT , GET  POST , DELETE , PATCH) WE MOSTLY MAKE IT AS AN ASYNC AWAIT
 
+        const token = await savedUser.getJWT();
+        res.cookie("token" , token , {
+            expires : new Date(Date.now() + 8 * 3600000),
+        });
+
         // after saving the user it will send a response
-        res.send("User Added Successfully");
+        res.json({message : "User Added Successfully" , data : savedUser});
     }
     catch(err){
         res.status(400).send("ERROR : " + err.message);
@@ -64,7 +70,7 @@ authRouter.post("/login" , async (req , res) => {
 
             // Add the token to cookie and send it back to the user 
             res.cookie("token" , token);
-            res.send("Login successful")
+            res.send(user)
         }else{
             throw new Error("Invalid Credentials");
         }

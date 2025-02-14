@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema({
     },
     skills : {
         type : [String],
+    },
+    description : {
+        type : String,
+        default : "This is a default description",
     }
 } , {
     timestamps : true,    //this will help track updation and creation timings of our documents
@@ -70,7 +74,7 @@ const userSchema = new mongoose.Schema({
 // using schema methods to offload some functionalties is always a good practice
 userSchema.methods.getJWT = async function (){
     const user = this;
-    console.log(user);
+    // console.log(user);
     const token = jwt.sign({_id : user._id} , "devTinder@000" , {
         expiresIn : "7d"
     });

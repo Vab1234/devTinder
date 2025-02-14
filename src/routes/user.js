@@ -4,7 +4,7 @@ const ConnectionRequest = require("../models/connRequest")
 const userRouter = express.Router();
 const User  = require("../models/user");
 
-const USER_SAFE_DATA = ["firstName" , "lastName" , "photoUrl" , "gender" , "skills"];
+const USER_SAFE_DATA = ["firstName" , "lastName" , "photoUrl" , "gender" , "skills" , "description" , "age"];
 
 // get all the pending conn reqs of the loggedin user
 userRouter.get("/user/requests/received" , userAuth , async (req , res) => {
@@ -29,7 +29,9 @@ userRouter.get("/user/requests/received" , userAuth , async (req , res) => {
 });
 
 // get api to get all the connected users to a person ie the accepted status reqs
-userRouter.get("/user/requests/accepted" , userAuth , async (req , res) =>{
+// THIS IS THE CONNECTIONS API
+// get("/user/requests/accepted" ---- same same
+userRouter.get("/user/connections" , userAuth , async (req , res) =>{
     try{
         const loggedInUser = req.user;
 
