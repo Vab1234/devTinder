@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
         required : true,
         validate(value){
             if(!validator.isStrongPassword(value)){
-                throw new Error("Ur password is weak!! Enter a strong one")
+                throw new Error("Password is weak!! Enter a strong one")
             }
         }
     },
@@ -84,9 +84,7 @@ userSchema.methods.getJWT = async function (){
 
 userSchema.methods.validatePassword = async function (passwordSentByUser){
     const user = this;
-
     const passwordHash = user.password;
-
     const isPasswordValid = await bcrypt.compare(passwordSentByUser , passwordHash);
     return isPasswordValid;
 }
