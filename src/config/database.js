@@ -9,7 +9,7 @@ const mongoose = require("mongoose");
 
 
 const connectDb = async function(){
-    await mongoose.connect("mongodb+srv://varunbudhani:EwYWW8LnF9CAKapZ@namastenode.n2gwq.mongodb.net/devTinder");
+    await mongoose.connect(process.env.MONGO_DB_URI);
     // this will connect to the entire cliuster but if we want to connect specific db we have to specify it ahead of net/ as in this case we have written devTinder so it is our db
     // this returns a promise so it is best to handle it in async await
 };

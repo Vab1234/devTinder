@@ -3,6 +3,8 @@ const connectDb = require("./config/database");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+require("dotenv").config();
+
 // Creating an Express server
 const app = express();
 
@@ -29,6 +31,7 @@ const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestsRouter = require("./routes/requests");
 const userRouter = require("./routes/user");
+const { config } = require("dotenv");
 
 // Using the routes
 app.use("/", authRouter);

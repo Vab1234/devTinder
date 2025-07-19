@@ -74,8 +74,8 @@ const userSchema = new mongoose.Schema({
 // using schema methods to offload some functionalties is always a good practice
 userSchema.methods.getJWT = async function (){
     const user = this;
-    // console.log(user);
-    const token = jwt.sign({_id : user._id} , "devTinder@000" , {
+    // console.log(process.env.JWT_SECRET);
+    const token = jwt.sign({_id : user._id} , process.env.JWT_SECRET , {
         expiresIn : "7d"
     });
     // console.log(token)
