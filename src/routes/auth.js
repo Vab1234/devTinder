@@ -63,17 +63,17 @@ authRouter.post("/login" , async (req , res) => {
         
         if(isPasswordValid){
             // create a JWT token
-            // const token = jwt.sign(hidden deta , secret key known only ny the server)
+            // const token = jwt.sign(hidden deta , secret key known only by the server)
             const token = await user.getJWT();
             // console.log("The token is " + token)
             // the cookie that the server will send from here will contain the userid encrypted
 
             // Add the token to cookie and send it back to the user 
-            res.cookie("token" , token , {
+            res.cookie("token", token, {
                 httpOnly: true,
-                secure: true, // must be true for HTTPS
-                sameSite: "None", // required for cross-site cookie
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                secure: true,           // Render uses HTTPS, so this must be true
+                sameSite: "None",       // Allows frontend (on Vercel) to access cookie
+                maxAge: 24 * 60 * 60 * 1000 // 1 day, or however long you want
             });
             res.send(user)
         }else{

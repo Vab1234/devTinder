@@ -9,12 +9,15 @@ const userAuth = async (req , res , next) => {
      */
     try{
         const {token} = req.cookies;
+        console.log("Token in auth middleware: ", token);
         if(!token){
             return res.status(401).send("Please Login");
         }
+        console.log(process.env.JWT_SECRET);
 
         const decodedObj = jwt.verify(token , process.env.JWT_SECRET);
         const { _id } = decodedObj;
+        console.log("Decoded Object: ", decodedObj);
 
         const user = await User.findOne({_id});
         if(!user){
